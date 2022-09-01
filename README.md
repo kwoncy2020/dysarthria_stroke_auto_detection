@@ -1,1 +1,1 @@
-"# for the stroke detection" 
+# for the stroke detection 
