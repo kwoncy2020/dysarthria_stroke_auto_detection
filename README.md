@@ -10,4 +10,7 @@
 ![current_model_flow3](./images/current_model_flow3.png)
 
 ***
-![current_model_flow4](./images/current_model_flow4.png)
+![develop_custom_model1](./images/develop_custom_model1.png)
+
+***
+![develop_custom_model2](./images/develop_custom_model2.png)
