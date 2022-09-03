@@ -70,14 +70,14 @@ class MyEncoder(tf.keras.layers.Layer):
         self.d_model = d_model
         self.num_heads = num_heads
         self.batch_size = batch_size
-        self.multy_head_attention = MHAttention(self.d_model, self.num_heads, self.batch_size)
+        self.multi_head_attention = MHAttention(self.d_model, self.num_heads, self.batch_size)
 
         self.dense1 = tf.keras.layers.Dense(d_model)
         self.layer_norm = tf.keras.layers.LayerNormalization(epsilon=1e-6)
         self.act1 = tf.keras.layers.Activation('relu')
 
     def __call__(self, input):
-        a = self.multy_head_attention(input)
+        a = self.multi_head_attention(input)
         con = tf.concat([input,a], axis=-1)
         o1 = self.dense1(con)
         o1 = self.layer_norm(o1)
