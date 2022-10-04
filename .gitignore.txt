@@ -1,0 +1,8 @@
+__pycache__/
+patients_info_0919.pkl
+patients_info_0919.xlsx
+patients_info_0922.pkl
+patients_info_0922.xlsx
+patients_info_0923.pkl
+patients_info_0923.xlsx
+temp.py
