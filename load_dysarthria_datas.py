@@ -89,6 +89,7 @@ class Patient:
         self.classification = self.patient_info_df.loc[self.patient_info_df["speakerID"] == self.patient_id,'classification'].values[0]
         self.intelligibility = self.patient_info_df.loc[self.patient_info_df["speakerID"] == self.patient_id,'intelligibility'].values[0]
         self.age = self.patient_info_df.loc[self.patient_info_df["speakerID"] == self.patient_id,'age'].values[0]
+        self.gender = self.patient_info_df.loc[self.patient_info_df["speakerID"] == self.patient_id,'gender'].values[0]
         self.is_wavs_loaded:bool = False
 
         # self.load_wavs()
@@ -120,7 +121,7 @@ class Patient:
         if not isinstance(nparray, np.ndarray):
             nparray = self.loaded_wavs.get_padded_shuffled_n_nparray()
         if save_name == None:
-            save_name = f"{self.patient_id}_{self.classification}_{self.intelligibility}_{self.age}_h{nparray.shape[0]}_w{nparray.shape[1]}.npy"
+            save_name = f"{self.patient_id}_{self.classification}_{self.intelligibility}_{self.age}_{self.gender}_h{nparray.shape[0]}_w{nparray.shape[1]}.npy"
 
         np.save(save_name, nparray)
         return self
@@ -146,7 +147,7 @@ class Patient:
 
 if __name__ == "__main__":
     BASE_PATH = "C:\kwoncy\\nlp\dysarthria2\data\**"
-    ID = "HS0006"
+    ID = "HL0111"
     PATIENT_INFO_PATH = "C:\kwoncy\\nlp\dysarthria2\data\\0923"
 
     
@@ -161,17 +162,15 @@ if __name__ == "__main__":
     # print(list(map(lambda x: x[-20:],glob.glob("C:\kwoncy\\nlp\dysarthria2\data\**\**\**\**\\",recursive=True))))
     # print(set(list(map(lambda x: x[-20:],glob.glob("C:\kwoncy\\nlp\dysarthria2\data\**\**\**\**\\",recursive=True)))))
 
-    # patient = Patient(BASE_PATH,ID,PATIENT_INFO_PATH).load_wavs().save_nparray()
+    patient = Patient(BASE_PATH,ID,PATIENT_INFO_PATH).load_wavs().save_nparray()
 
-    BASE_PATH2 = "C:\kwoncy\\nlp\dysarthria2\CI"
-
+    # BASE_PATH2 = "C:\kwoncy\\nlp\dysarthria2\CI"
     # a = np.load(glob.glob(f'{BASE_PATH2}\{ID}*.npy')[0])
-
-    l_ = []
-    for file_path in glob.glob(f'{BASE_PATH2}\*.npy'):
-        temp = np.load(file_path)
-        l_.append(temp)
-        print(file_path)
+    # l_ = []
+    # for file_path in glob.glob(f'{BASE_PATH2}\*.npy'):
+    #     temp = np.load(file_path)
+    #     l_.append(temp)
+    #     print(file_path)
 
 
 
