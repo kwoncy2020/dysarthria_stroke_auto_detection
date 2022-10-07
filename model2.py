@@ -222,9 +222,11 @@ if "__main__" == __name__:
     ## 50, 512
 
     reshaped2 = tf.reshape(md4,(-1,2500,512))
-    enc1 = MyEncoder(2500,10,BATCH_SIZE)(reshaped2)
+    tr1 = tf.transpose(reshaped2,[0,2,1])
+    enc1 = MyEncoder(2500,10,BATCH_SIZE)(tr1)
+    enc2 = MyEncoder(2500,10,BATCH_SIZE)(enc1)
 
-    flat1 = Flatten()(enc1)
+    flat1 = Flatten()(enc2)
     batch6 = BatchNormalization()(flat1)
     dense1 = Dense(200, activation='relu')(batch6)
     batch7 = BatchNormalization()(dense1)
@@ -235,3 +237,6 @@ if "__main__" == __name__:
     model = Model(input_layer, output_layer)
 
     model.summary()
+
+
+
