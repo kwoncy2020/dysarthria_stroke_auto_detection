@@ -13,7 +13,7 @@ ACTIVATION_FN = 'elu'
 filters = 32
 
 class MHAttention(tf.keras.layers.Layer):
-    def __init__(self, d_model:int, num_heads:int, batch_size:int):
+    def __init__(self, d_model:int, num_heads:int, batch_size:int=None):
         super(MHAttention,self).__init__()
         self.d_model = d_model
         self.num_heads = num_heads
@@ -32,19 +32,15 @@ class MHAttention(tf.keras.layers.Layer):
 
 
     def split_heads(self, input):
-        # if self.batch_size == None:
-        #     batch_size = tf.shape(input)[0]
-        # else: 
-        #     batch_size = self.batch_size
-        input = tf.reshape(input,(self.batch_size, -1, self.num_heads, self.depth))
+        batch_size = tf.shape(input)[0] if self.batch_size == None else self.batch_size
+        
+        input = tf.reshape(input,(batch_size, -1, self.num_heads, self.depth))
         return tf.transpose(input, perm=[0,2,1,3])
 
 
     def __call__(self, input):
-        # if self.batch_size == None:
-        #     batch_size = tf.shape(input)[0]
-        # else: 
-        #     batch_size = self.batch_size
+        batch_size = tf.shape(input)[0] if self.batch_size == None else self.batch_size
+        
         query = self.query(input)
         key = self.key(input)
         value = self.value(input)
@@ -59,13 +55,13 @@ class MHAttention(tf.keras.layers.Layer):
         q_mat_k_soft = self.softmax(q_mat_k)
         attention_score = tf.matmul(q_mat_k_soft, value_splitted)
         attention_score = tf.transpose(attention_score, perm=[0,2,1,3])
-        attention_score = tf.reshape(attention_score, (self.batch_size, -1, self.d_model))
+        attention_score = tf.reshape(attention_score, (batch_size, -1, self.d_model))
 
         return self.outweight(attention_score)
 
 
 class MyEncoder(tf.keras.layers.Layer):
-    def __init__(self, d_model:int, num_heads:int, batch_size:int):
+    def __init__(self, d_model:int, num_heads:int, batch_size:int=None):
         super(MyEncoder,self).__init__()
         self.d_model = d_model
         self.num_heads = num_heads
@@ -84,6 +80,7 @@ class MyEncoder(tf.keras.layers.Layer):
         o1 = self.act1(o1)       
 
         return o1
+
 
 class Res1(tf.keras.layers.Layer):
     def __init__(self,filters:int,kernel_size:int,padding:str,activation:str, flag_res:bool=True):
@@ -167,8 +164,7 @@ class MobileDense1(tf.keras.layers.Layer):
 
 if "__main__" == __name__:
 
-
-    # input_layer = Input(shape=(64000,1), batch_size=BATCH_SIZE)
+    # input_layer = Input(shape=(64000,1))
 
     # res1 = Res1(filters, 3, 'same', ACTIVATION_FN)(input_layer)
     # ## 32000, 32
@@ -185,11 +181,15 @@ if "__main__" == __name__:
     # res5 = Res1(filters*16, 3, 'same', ACTIVATION_FN)(res4)
     # ## 2000, 512
 
-    # conv1 = Conv1D(filters *16, kernel_size=3, padding='same')(res5)
-    # ## 2000, 512
+    # res6 = Res1(filters*8, 3, 'same', ACTIVATION_FN)(res5)
+    # ## 1000, 256
+
+    
+    # conv1 = Conv1D(filters*4, kernel_size=3, padding='same')(res6)
+    # ## 1000, 128
     # tr1 = tf.transpose(conv1,perm=[0,2,1])
     # # print("input_layer, ", res10)
-    # enc1 = MyEncoder(2000,8,BATCH_SIZE)(tr1)
+    # enc1 = MyEncoder(1000,10,tf.shape(res1)[0])(tr1)
 
     # flat1 = Flatten()(enc1)
     # batch6 = BatchNormalization()(flat1)
@@ -200,11 +200,11 @@ if "__main__" == __name__:
     # output_layer = Dense(1, activation='sigmoid')(dense2)
 
     # model = Model(input_layer, output_layer)
-
+    
     # model.summary()
 
     
-    input_layer = Input(shape=(64000,1), batch_size=BATCH_SIZE)
+    input_layer = Input(shape=(64000,1))
     conv = Conv1D(320,3, padding='same')(input_layer)
     bn = BatchNormalization()(conv)
     act = Activation('relu')(bn)
@@ -223,8 +223,8 @@ if "__main__" == __name__:
 
     reshaped2 = tf.reshape(md4,(-1,2500,512))
     tr1 = tf.transpose(reshaped2,[0,2,1])
-    enc1 = MyEncoder(2500,10,BATCH_SIZE)(tr1)
-    enc2 = MyEncoder(2500,10,BATCH_SIZE)(enc1)
+    enc1 = MyEncoder(2500,10,tf.shape(conv)[0])(tr1)
+    enc2 = MyEncoder(2500,10,tf.shape(conv)[0])(enc1)
 
     flat1 = Flatten()(enc2)
     batch6 = BatchNormalization()(flat1)
