@@ -1,6 +1,8 @@
+import enum
 import glob, librosa, pickle, random
 import numpy as np
 import pandas as pd
+from typing import Union
 
 BASE_PATH = "C:\kwoncy\\nlp\dysarthria\data"
 hospital = "HS"
@@ -117,11 +119,22 @@ class Patient:
         
         return self
 
-    def save_nparray(self, nparray:np.ndarray=None, save_name:str=None) -> 'Patient':
+    def save_nparray(self, nparray:np.ndarray=None, save_name:str=None, save_type:str='raw') -> 'Patient':
         if not isinstance(nparray, np.ndarray):
             nparray = self.loaded_wavs.get_padded_shuffled_n_nparray()
+            c = 0
+        elif np.ndim(nparray) == 2:
+            c = 0
+            
+        if save_type == 'mfcc':
+            ## n_fft = 400 ==> 25ms window under the sample rate of 16000, hop_length=160 ==> 10ms hop 
+            nparray = np.apply_along_axis(lambda x : librosa.feature.mfcc(y=x, sr=16000, n_mfcc=20, hop_length=160, n_fft=400), 1, nparray)
+            c = nparray.shape[2]
+        
+        print("nparray_shape: ", nparray.shape)
+        
         if save_name == None:
-            save_name = f"{self.patient_id}_{self.classification}_{self.intelligibility}_{self.age}_{self.gender}_h{nparray.shape[0]}_w{nparray.shape[1]}.npy"
+            save_name = f"{self.patient_id}_{self.classification}_{self.intelligibility}_{self.age}_{self.gender}_wavs{self.wav_files_length}_h{nparray.shape[0]}_w{nparray.shape[1]}_c{c}_{save_type}.npy"
 
         np.save(save_name, nparray)
         return self
@@ -147,10 +160,10 @@ class Patient:
 
 if __name__ == "__main__":
     BASE_PATH = "C:\kwoncy\\nlp\dysarthria2\data\**"
-    ID = "HL0111"
-    PATIENT_INFO_PATH = "C:\kwoncy\\nlp\dysarthria2\data\\0923"
+    ID = "HL0292"
+    PATIENT_INFO_PATH = "C:\kwoncy\\nlp\dysarthria2\data"
 
-    
+                                                                                                                 
     # patient.save_nparray()
     # print(len(glob.glob("C:\kwoncy\\nlp\dysarthria2\data\**\**\**\**\\",recursive=True)))  ## 3050?
     # print(len(set(glob.glob("C:\kwoncy\\nlp\dysarthria2\data\**\**\**\**\\",recursive=True)))) ## 101
@@ -162,16 +175,5 @@ if __name__ == "__main__":
     # print(list(map(lambda x: x[-20:],glob.glob("C:\kwoncy\\nlp\dysarthria2\data\**\**\**\**\\",recursive=True))))
     # print(set(list(map(lambda x: x[-20:],glob.glob("C:\kwoncy\\nlp\dysarthria2\data\**\**\**\**\\",recursive=True)))))
 
-    patient = Patient(BASE_PATH,ID,PATIENT_INFO_PATH).load_wavs().save_nparray()
+    patient = Patient(BASE_PATH,ID,PATIENT_INFO_PATH).load_wavs().save_nparray(save_type='mfcc')
 
-    # BASE_PATH2 = "C:\kwoncy\\nlp\dysarthria2\CI"
-    # a = np.load(glob.glob(f'{BASE_PATH2}\{ID}*.npy')[0])
-    # l_ = []
-    # for file_path in glob.glob(f'{BASE_PATH2}\*.npy'):
-    #     temp = np.load(file_path)
-    #     l_.append(temp)
-    #     print(file_path)
-
-
-
-    
